@@ -1,23 +1,13 @@
-import Task from "./Task"
+import Task from "./Task";
 
-const ApartmentTaskList = ({ aptId, users, tasks}) => {
-  const flatTasks = Object.values(users).map((user, idx) => 
-  (Object.keys(user.tasks).map((taskId) => ({...tasks[taskId], completed:user.tasks[taskId], user:user})))).flat().sort((task1, task2) => 
-  task1.daysRemaining - task2.daysRemaining)
-  return (
-  <div>
-    {
-          flatTasks.map((task,idx) => (
-          <Task key={ idx } 
-              aptId={ aptId }
-              userId={ task.user.id }
-              task={ task } >
-            { task.user.name }
-          </Task>
-        ))
-    }
-  </div>
-  )
+const ApartmentTaskList = ({ aptId, tasks, updateTask, deleteTask, users }) => {
+    return (
+        <div>
+            {tasks.map((task, idx) => (
+                <Task key={task.TaskID} aptId={aptId} task={task} updateTask={updateTask} deleteTaskFromState={deleteTask} users={users} />
+            ))}
+        </div>
+    );
 };
-  
+
 export default ApartmentTaskList;

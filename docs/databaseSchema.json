@@ -15,7 +15,7 @@
           "daysRemaining": 1
         }
       },
-      "userIdCounter": 0,
+      "UserIDCounter": 0,
       "users": {
         "idU0": {
           "name": "User 1",

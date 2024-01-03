@@ -1,61 +1,75 @@
-import {Modal} from 'react-bootstrap';
-import { updateData, getRefByPush } from '../firebase';
+import React, { useState } from 'react';
+import { Modal } from 'react-bootstrap';
 
-const createUser = async ( user, aptId ) => {
-    try {
-      const userRef = getRefByPush(`/apartments/${aptId}/users`);
-      const userKey = userRef.key;
-      user = ({...user, 'id':userKey});
-     // taskRef.push(task);
-      updateData(userRef, user);
-  
-    } catch (error) {
-      alert(error);
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+
+const AddUser = ({ show, handleClose, aptId, onUserAdded}) => {
+  const [userName, setUserName] = useState('');
+
+  const createUser = (name, aptId) => {
+    fetch(`${API_BASE_URL}/apartments/${aptId}/users/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      const newUser = { UserID: data.id, Name: data.name}
+      onUserAdded(newUser); // Add the new user to the list of users and update state of apartment page
+      handleClose(); // Close the modal and reset the form
+      setUserName(''); // Reset the input field
+    })
+    .catch(error => {
+      console.error('Error adding user:', error);
+    });
+  };
+
+  const validateForm = () => {
+    const name = userName.trim();
+    if (!name) {
+      alert("Please enter a user name.");
+      return;
     }
-  }
+    createUser(name, aptId);
+  };
 
-const validateForm = (aptId, handleClose) => {
-    const userName = document.querySelector('#userName').value;
-    
-    if (userName === ''){
-      alert('Please enter a name for the user')
-      return
-    }
-    
-
-    const user =  { 
-                "name": userName,
-                "tasks": {},
-            }
-
-    createUser(user, aptId);
-    handleClose();
-}
-
-
-const AddUser = ( {show, handleClose, aptId} ) => (
+  return (
     <Modal show={show} onHide={handleClose} animation={false}>
-    <Modal.Header>
-      <Modal.Title>Add User</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <form>
-        <div class="form-group p-2">
-          <label for="userName">New User:</label>
-          <input class="form-control" id="userName" placeholder="User name" maxLength={50} />
-        </div>
-      </form>
-    </Modal.Body>
-    <Modal.Footer>
-      <button className='btn btn-secondary' onClick={handleClose}>
-        Close
-      </button>
-      <button className='btn btn-primary' onClick={() => validateForm(aptId, handleClose)}>
-        Save Changes
-      </button>
-    </Modal.Footer>
-  </Modal>
-
-)
+      <Modal.Header>
+        <Modal.Title>Add User</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <form>
+          <div className="form-group p-2">
+            <label htmlFor="userName">New User:</label>
+            <input 
+              className="form-control" 
+              id="userName" 
+              placeholder="User name" 
+              maxLength={50} 
+              value={userName} 
+              onChange={(e) => setUserName(e.target.value)} />
+          </div>
+        </form>
+      </Modal.Body>
+      <Modal.Footer>
+        <button className='btn btn-secondary' onClick={handleClose}>
+          Close
+        </button>
+        <button className='btn btn-primary' onClick={validateForm}>
+          Save Changes
+        </button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
 
 export default AddUser;

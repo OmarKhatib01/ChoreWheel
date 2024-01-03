@@ -1,72 +1,98 @@
 import React from 'react';
-import { updateDataByPath } from '../firebase';
+import { useNavigate } from "react-router-dom";
 
-const createAptData = async (onFinish, aptKeys) => {
-  const input = document.querySelector("#apt_input").value.trim()
-  if (input === '') {
-    alert('Please enter an apartment ID')
-    return
-  }
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
-  if (aptKeys.includes(input)) {
-    alert(`Specified Apartment ID "${input}" already exists; Enter a new ID`);
+const createAptData = async (onSignUp, navigate) => {
+  const name = document.querySelector("#apt_name_input").value.trim();
+  const address = document.querySelector("#apt_address_input").value.trim();
+  const password = document.querySelector("#apt_password_input").value.trim();
+
+  if (name === '' || password === '') {
+    alert('Please enter both an apartment name and password');
     return;
   }
-  
-  await updateDataByPath(`/apartments/`, {
-    [input] : 
-      {
-        "tasks" : {
-          "-1" : {
-            "daysRemaining" : 3,
-            "id" : "-1T",
-            "interval" : 5,
-            "title" : "-1"
-          }
-        }, 
-        "users" : {
-          "-1" : {
-            "id" : "-1U",
-            "name" : "-1",
-            "tasks" : {
-            "-1T" : false
-          }
-        }
+
+  console.log('Sending data:', JSON.stringify({ name, address, password }));
+  fetch(`${API_BASE_URL}/apartment/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+    },
+    body: JSON.stringify({ name, address, password }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        alert('Apartment name already exists, please try again.');
+        throw new Error('Network response was not ok: ' + response.statusText);
       }
-    }
-  });
-  onFinish(input)  
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      navigate(`/apartment/${data.id}`)
+    })
+    .catch(error => {
+      console.error('Error creating apartment:', error);
+    });
+};
+
+const ApartmentCreateButton = ({ onSignUp }) => {
+  const navigate = useNavigate();
+
+  return (
+    <button type="button" className="btn btn-primary" onClick={() => createAptData(onSignUp, navigate)}>
+      Create New Apartment
+    </button>
+  );
 }
 
-const ApartmentCreateButton = ({onFinish, aptKeys}) => (
-  <button type="button" 
-      className="btn btn-primary" 
-      onClick = {() => createAptData(onFinish, aptKeys)}> 
-    Create New Apartment
-  </button>
-);
+const ApartmentCreation = ({ onSignUp }) => {
+  const navigate = useNavigate();
 
-const ApartmentCreation = ({ onFinish, aptKeys, setShowCreate }) => (
-  <form className="container p-2 text-center">
-    <div className="form-group">
-      <label htmlFor="exampleInputEmail1">
-        Apartment ID
-      </label>
-      <input type="name" 
-          className="form-control mb-4 mx-auto text-center" 
-          style= {{maxWidth: '700px'}}
-          id="apt_input" 
-          placeholder="Enter new Apartment ID" />
+  return (
+    <div className='row'>
+      <form className="container p-2 bg-light mt-5 rounded p-3 col-12 col-md-8 col-lg-4 ">
+        <h3 className='text-center'>Create a New Apartment</h3>
+        <br />
+        <div className="form-group">
+          <label htmlFor="apt_name_input" className='mb-2 fw-bold'>Apartment Name</label>
+          <input type="text"
+            className="form-control mb-4 mx-auto"
+            id="apt_name_input"
+            placeholder="Enter new Apartment Name" />
+        </div>
+        <div className="form-group">
+          <label htmlFor="apt_address_input" className='mb-2 fw-bold'>Apartment Address</label>
+          <input type="text"
+            className="form-control mb-4 mx-auto"
+            id="apt_address_input"
+            placeholder="Enter Apartment Address" />
+        </div>
+        <div className="form-group">
+          <label htmlFor="apt_password_input" className='mb-2 fw-bold'>Apartment Password</label>
+          <input type="password"
+            className="form-control mb-4 mx-auto"
+            id="apt_password_input"
+            placeholder="Enter Apartment Password" />
+        </div>
+        <div className='d-flex justify-content-end'>
+          <ApartmentCreateButton onSignUp={onSignUp} />
+        </div>
+        {/* ... rest of your component ... */}
+        <br />
+        <div className='d-flex justify-content-end'>
+          <p className="mt-1">
+            Already have an apartment?
+            <a className="mx-2" href="/login" onClick={() => navigate('/login')}>
+              Log in here!
+            </a>
+          </p>
+        </div>
+      </form>
     </div>
-    <ApartmentCreateButton onFinish={onFinish} aptKeys={aptKeys}/>
-    <br/>
-    <p className="m-0 mt-1">
-      Already have an apartment? 
-      <a href="#" onClick={() => setShowCreate()}> 
-        Login here!
-      </a> 
-    </p>
-  </form>
-);
+  );
+}
 
 export default ApartmentCreation;

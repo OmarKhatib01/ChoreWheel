@@ -7,9 +7,7 @@ import Layout from './Layout';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Layout>
       <App />
-    </Layout>
   </React.StrictMode>,
   document.getElementById('root')
 );
