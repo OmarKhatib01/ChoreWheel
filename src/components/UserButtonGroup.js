@@ -1,5 +1,5 @@
 
-const UserButtonGroup = ({ currUser, users, setUser,children }) => (
+const UserButtonGroup = ({ currUser, users, setUser, children }) => (
     <div className="container text-center">
       {children}
       {

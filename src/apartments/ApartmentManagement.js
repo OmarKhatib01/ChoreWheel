@@ -7,7 +7,7 @@ const ApartmentManagement = ({onFinish, aptKeys}) => {
   const [showCreate, setShowCreate] = useState(false);
 
   return showCreate ? (
-      <ApartmentCreation onFinish={onFinish} aptKeys={aptKeys} setShowCreate={() => setShowCreate(false)}/>
+      <ApartmentCreation onFinish={onFinish} setShowCreate={() => setShowCreate(false)}/>
     ) : (
       <ApartmentLogin onFinish={onFinish} aptKeys={aptKeys} setShowCreate={() => setShowCreate(true)}/>
     );
