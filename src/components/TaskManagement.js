@@ -1,17 +1,17 @@
 import {Modal} from 'react-bootstrap';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 
 const AddTask = ({show, handleClose, users, aptId, onTasksAdded}) =>  {
 
   const createTask = async (task, aptId) => {
-    console.log("Sending data:", JSON.stringify(task));
 
     fetch(`${API_BASE_URL}/apartments/${aptId}/tasks/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
       },
       body: JSON.stringify(task),
     })
@@ -22,7 +22,6 @@ const AddTask = ({show, handleClose, users, aptId, onTasksAdded}) =>  {
       return response.json();
     })
     .then(data => {
-      console.log('Task added:', data);
       onTasksAdded(data); // Update tasks state
     })
     .catch(error => {

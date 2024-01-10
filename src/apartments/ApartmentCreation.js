@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 const createAptData = async (onSignUp, navigate) => {
   const name = document.querySelector("#apt_name_input").value.trim();
@@ -13,12 +13,10 @@ const createAptData = async (onSignUp, navigate) => {
     return;
   }
 
-  console.log('Sending data:', JSON.stringify({ name, address, password }));
   fetch(`${API_BASE_URL}/apartment/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
     },
     body: JSON.stringify({ name, address, password }),
   })

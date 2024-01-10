@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const AddUser = ({ show, handleClose, aptId, onUserAdded}) => {
   const [userName, setUserName] = useState('');
@@ -11,6 +11,7 @@ const AddUser = ({ show, handleClose, aptId, onUserAdded}) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
       },
       body: JSON.stringify({ name }),
     })

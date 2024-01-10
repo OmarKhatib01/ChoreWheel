@@ -7,27 +7,7 @@ import AddTask from '../components/TaskManagement';
 import AddUser from '../components/UserManagement';
 import { BiBuildingHouse } from 'react-icons/bi';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
-
-
-// const getTask = (taskId, apt) => (
-//   apt.tasks[taskId]
-// );
-
-// const filterList = (lst) => Object.fromEntries(Object.entries(lst).filter(([key, val]) => (key !== "-1")));
-// const filterAptData = (aptData) => Object.fromEntries(Object.entries(aptData).map(([key, val]) => [key, filterList(val)]));
-// const filterData = (data) => Object.fromEntries(Object.entries(data).map(([aptKey, aptData]) => [aptKey, filterAptData(aptData)]));
-
-// function App() {
-//   const [aptId, setApt] = useState(null); // null initially indicating no apartment selected
-//   const [creatingApt, setCreatingApt] = useState(true); // Start with creating an apartment
-//   const [user, setUser] = useState('');
-//   const [data, setData] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [show, setShow] = useState(false);
-//   const [showUserAdd, setShowUserAdd] = useState(false);
-
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const ApartmentPage = () => {
     const { id } = useParams(); // Get the apartment ID from the URL
@@ -65,54 +45,66 @@ const ApartmentPage = () => {
         const remainingTasks = tasks.filter(task => task.TaskID !== deletedTaskId);
         setTasks(remainingTasks);
     };
-
     useEffect(() => {
-        // Fetch and set apartment data for the given apartment ID
-        fetch(`${API_BASE_URL}/apartments/${id}`)
-            .then(response => {
+        const fetchApartmentData = async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/apartments/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.statusText);
                 }
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
                 setApartment(data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching apartment:', error);
-            });
+            }
+        };
 
-        // Fetch and set users for the given apartment ID
-        fetch(`${API_BASE_URL}/apartments/${id}/users`)
-            .then(response => {
+        const fetchUsersData = async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/apartments/${id}/users`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.statusText);
                 }
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
                 setUsers(data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching users:', error);
-            });
+            }
+        };
 
-        // Fetch and set tasks for the given apartment ID
-        fetch(`${API_BASE_URL}/apartments/${id}/tasks`)
-            .then(response => {
+        const fetchTasksData = async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/apartments/${id}/tasks`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Network response was not ok: ' + response.statusText);
                 }
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
                 setTasks(data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching tasks:', error);
-            });
-    }, [id]);
+            }
+        };
 
+        fetchApartmentData();
+        fetchUsersData();
+        fetchTasksData();
+    }, [id]);
+    
     if (!apartment) return <h1>Loading...</h1>;
 
     return (

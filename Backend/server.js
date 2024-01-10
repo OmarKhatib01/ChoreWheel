@@ -12,6 +12,10 @@ app.use(bodyParser.json());
 // Enable CORS for your React application
 app.use(cors());
 
+// Secret key for JWT token
+const secretKey = process.env.JWT_SECRET || 'secret';
+console.log('Secret key:', secretKey);
+
 // Set up MySQL connection
 const connection = mysql.createConnection({
     host: 'localhost', // or your remote database host
@@ -33,7 +37,7 @@ const verifyToken = (req, res, next) => {
         return res.status(401).send('Unauthorized request');
     }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, secretKey);
         req.userId = decoded.id;
         next();
     } catch (e) {
@@ -43,10 +47,9 @@ const verifyToken = (req, res, next) => {
 };
 
 // create a new apartment
-app.post('/apartment/create', verifyToken, (req, res) => {
+app.post('/apartment/create', (req, res) => {
     console.log('Received data:', req.body);
     const { name, address, password } = req.body;
-
     if (!name || !password) {
         return res.status(400).json({ message: 'Apartment name and password are required' });
     }
@@ -86,12 +89,12 @@ app.post('/apartment/create', verifyToken, (req, res) => {
 
 
 // login to an apartment
-app.post('/apartment/login', verifyToken, (req, res) => {
+app.post('/apartment/login', (req, res) => {
     const { name, password } = req.body;
+    console.log('Received login request:', name, password);
     if (!name || !password) {
         return res.status(400).send('Apartment name and password are required');
     }
-
     connection.query(
         'SELECT * FROM Apartments WHERE Name = ? AND Password = ?',
         [name, password],
@@ -106,7 +109,7 @@ app.post('/apartment/login', verifyToken, (req, res) => {
                 return res.status(404).json({ message: 'No apartment found with that name and password' });
             } else {
                 // Create and return JWT token
-                const token = jwt.sign({ id: results[0].ApartmentID }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign({ id: results[0].ApartmentID }, secretKey, { expiresIn: '1h' });
                 //return apartment id, name, and address
                 res.json({
                     id: results[0].ApartmentID,
@@ -269,7 +272,7 @@ app.post('/apartments/:id/users/create', verifyToken, (req, res) => {
 
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
